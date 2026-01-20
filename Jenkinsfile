@@ -32,7 +32,8 @@ pipeline {
                     rm -rf /var/www/${env.NEW_ENV}/*
 
                     echo "Copying files"
-                    rsync -av ${env.NEW_ENV}/ /var/www/${env.NEW_ENV}/
+                    rsync -av --no-owner --no-group --no-perms ${env.NEW_ENV}/ /var/www/${env.NEW_ENV}/
+
 
                     cd /var/www/${env.NEW_ENV}
                     npm install
