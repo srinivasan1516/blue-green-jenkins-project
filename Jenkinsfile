@@ -7,7 +7,7 @@ pipeline {
             steps {
                 script {
                     def blueRunning = sh(
-                        script: "pm2 list | grep blue-app || true",
+                        script: "pm2 list | grep blue || true",
                         returnStatus: true
                     )
 
@@ -18,6 +18,8 @@ pipeline {
                         env.NEW_ENV = "blue"
                         env.OLD_ENV = "green"
                     }
+
+                    echo "Deploying to ${env.NEW_ENV}"
                 }
             }
         }
@@ -26,8 +28,12 @@ pipeline {
             steps {
                 script {
                     sh """
+                    echo "Cleaning target directory"
                     rm -rf /var/www/${env.NEW_ENV}/*
-                    cp -r ${env.NEW_ENV}/* /var/www/${env.NEW_ENV}/
+
+                    echo "Copying files"
+                    rsync -av ${env.NEW_ENV}/ /var/www/${env.NEW_ENV}/
+
                     cd /var/www/${env.NEW_ENV}
                     npm install
                     """
@@ -40,7 +46,7 @@ pipeline {
                 script {
                     sh """
                     cd /var/www/${env.NEW_ENV}
-                    pm2 start app.js --name ${env.NEW_ENV}-app
+                    pm2 start app.js --name ${env.NEW_ENV} || pm2 restart ${env.NEW_ENV}
                     """
                 }
             }
@@ -49,7 +55,7 @@ pipeline {
         stage('Stop Old App') {
             steps {
                 script {
-                    sh "pm2 stop ${env.OLD_ENV}-app || true"
+                    sh "pm2 stop ${env.OLD_ENV} || true"
                 }
             }
         }
