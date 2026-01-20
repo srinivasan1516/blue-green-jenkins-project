@@ -1,10 +1,12 @@
-const express = require('express');
+const express = require("express");
 const app = express();
 
-app.get('/', (req, res) => {
-  res.send("Hello from BLUE environment");
+const PORT = process.env.PORT;
+
+app.get("/", (req, res) => {
+  res.send(`Hello from ${process.env.APP_COLOR} environment`);
 });
 
-app.listen(3000, () => {
-  console.log("BLUE app running on port 3000");
+app.listen(PORT, () => {
+  console.log(`Running on port ${PORT}`);
 });
